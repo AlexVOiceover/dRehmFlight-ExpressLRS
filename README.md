@@ -14,7 +14,14 @@ dRehmFlight has been used as a teaching tool for aircraft stabilization and flig
 
 This code is entirely free to use and will stay that way forever. If you found this helpful for your project, donations are appreciated: [Paypal Donation](https://www.paypal.me/NicholasRehm)
 
-**New in Beta 1.3:**
+**New in this ExpressLRS Fork:**
+
+- **ExpressLRS/ELRS Support** - Full CRSF protocol implementation at 420kHz
+- **8-Channel Support** - Extended from 6 to 8 channels for advanced setups
+- **AlfredoCRSF Library** - Bundled locally for easy compilation
+- **Enhanced Failsafe** - Extended failsafe support for all 8 channels
+
+**Original dRehmFlight Beta 1.3 Features:**
 
 - Spektrum DSM Satellite RX Support
 - One-time IMU calibration
@@ -43,6 +50,25 @@ These (and all Amazon links contained within the supporting documentation) are A
 Code is uploaded to the board using the Arduino IDE; download the latest version here: https://www.arduino.cc/en/main/software
 
 To connect to the Teensy, you must also download and install the Teensyduino arduino add-on; download and instructions available here: https://www.pjrc.com/teensy/td_download.html
+
+## ExpressLRS Setup
+
+This fork includes built-in ExpressLRS (ELRS) support using the CRSF protocol:
+
+**Hardware Connection:**
+- Connect your ELRS receiver's TX pin to Teensy Serial3 RX (Pin 7)  
+- Connect your ELRS receiver's RX pin to Teensy Serial3 TX (Pin 8)
+- Power and ground as normal
+
+**Software Configuration:**
+- The code is pre-configured for ELRS (line 37: `#define USE_ELRS_RX`)
+- Supports up to 8 channels from your ExpressLRS transmitter
+- Runs at 420kHz baud rate (standard CRSF)
+- No additional libraries needed - AlfredoCRSF is bundled
+
+**To use other receiver types:**
+- Comment out `#define USE_ELRS_RX` 
+- Uncomment your preferred option (USE_PWM_RX, USE_PPM_RX, USE_SBUS_RX, USE_DSM_RX)
 
 
 ## Tutorial Videos
@@ -89,6 +115,15 @@ dRehmflight has been successfully implemented on the following platforms:
 
 
 I would love to see your flying creations and maybe feature them here as well. Please email me at NicholasRehmYT@gmail.com with any videos/pics of your project. -Nick Rehm
+
+## ExpressLRS Fork Credits
+
+This ExpressLRS fork was created by Alex based on:
+- Original dRehmFlight by Nicholas Rehm
+- CRSF/ELRS implementation from PR #17 by ChappyM  
+- AlfredoCRSF library by AlfredoSystems (https://github.com/AlfredoSystems/AlfredoCRSF)
+
+All modifications are licensed under GPL v3, same as the original project.
 
 
 ## Disclaimer
