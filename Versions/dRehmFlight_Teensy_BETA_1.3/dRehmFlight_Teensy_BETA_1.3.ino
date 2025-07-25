@@ -31,10 +31,11 @@ Everyone that sends me pictures and videos of your flying creations! -Nick
 //========================================================================================================================//
 
 //Uncomment only one receiver type
-#define USE_PWM_RX
+//#define USE_PWM_RX
 //#define USE_PPM_RX
 //#define USE_SBUS_RX
 //#define USE_DSM_RX
+#define USE_ELRS_RX
 static const uint8_t num_DSM_channels = 6; //If using DSM RX, change this to match the number of transmitter channels you have
 
 //Uncomment only one IMU
@@ -72,6 +73,16 @@ static const uint8_t num_DSM_channels = 6; //If using DSM RX, change this to mat
 #if defined USE_DSM_RX
   #include "src/DSMRX/DSMRX.h"  
 #endif
+
+#if defined USE_ELRS_RX
+// Setup Radio Rx
+  #include "src/AlfredoCRSF/src/AlfredoCRSF.h"
+#endif
+
+/*
+CRSF library bundled locally from https://github.com/AlfredoSystems/AlfredoCRSF 
+This provides ExpressLRS/ELRS support via the CRSF protocol at 420kHz baud rate.
+*/
 
 #if defined USE_MPU6050_I2C
   #include "src/MPU6050/MPU6050.h"
@@ -152,6 +163,8 @@ unsigned long channel_3_fs = 1500; //elev
 unsigned long channel_4_fs = 1500; //rudd
 unsigned long channel_5_fs = 2000; //gear, greater than 1500 = throttle cut
 unsigned long channel_6_fs = 2000; //aux1
+unsigned long channel_7_fs = 1500; //aux2
+unsigned long channel_8_fs = 1500; //aux3
 
 //Filter parameters - Defaults tuned for 2kHz loop rate; Do not touch unless you know what you are doing:
 float B_madgwick = 0.04;  //Madgwick filter parameter
@@ -256,7 +269,7 @@ unsigned long blink_counter, blink_delay;
 bool blinkAlternate;
 
 //Radio communication:
-unsigned long channel_1_pwm, channel_2_pwm, channel_3_pwm, channel_4_pwm, channel_5_pwm, channel_6_pwm;
+unsigned long channel_1_pwm, channel_2_pwm, channel_3_pwm, channel_4_pwm, channel_5_pwm, channel_6_pwm, channel_7_pwm, channel_8_pwm;
 unsigned long channel_1_pwm_prev, channel_2_pwm_prev, channel_3_pwm_prev, channel_4_pwm_prev;
 
 #if defined USE_SBUS_RX
@@ -267,6 +280,9 @@ unsigned long channel_1_pwm_prev, channel_2_pwm_prev, channel_3_pwm_prev, channe
 #endif
 #if defined USE_DSM_RX
   DSM1024 DSM;
+#endif
+#if defined USE_ELRS_RX
+  AlfredoCRSF crsf;  //CRSF object
 #endif
 
 //IMU:
@@ -340,6 +356,8 @@ void setup() {
   channel_4_pwm = channel_4_fs;
   channel_5_pwm = channel_5_fs;
   channel_6_pwm = channel_6_fs;
+  channel_7_pwm = channel_7_fs;
+  channel_8_pwm = channel_8_fs;
 
   //Initialize IMU communication
   IMUinit();
@@ -1202,6 +1220,19 @@ void getCommands() {
         channel_5_pwm = values[4];
         channel_6_pwm = values[5];
     }
+  
+  #elif defined USE_ELRS_RX
+    // Read the radio chanels into the system
+      crsf.update();
+      channel_1_pwm = crsf.getChannel(1);
+      channel_2_pwm = crsf.getChannel(2); 
+      channel_3_pwm = crsf.getChannel(3); 
+      channel_4_pwm = crsf.getChannel(4);
+      channel_5_pwm = crsf.getChannel(5);
+      channel_6_pwm = crsf.getChannel(6);
+      channel_7_pwm = crsf.getChannel(7);
+      channel_8_pwm = crsf.getChannel(8);
+  
   #endif
   
   //Low-pass the critical commands and update previous values
@@ -1250,6 +1281,8 @@ void failSafe() {
     channel_4_pwm = channel_4_fs;
     channel_5_pwm = channel_5_fs;
     channel_6_pwm = channel_6_fs;
+    channel_7_pwm = channel_7_fs;
+    channel_8_pwm = channel_8_fs;
   }
 }
 
